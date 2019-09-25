@@ -1,6 +1,8 @@
 use std::convert::TryFrom;
 
-#[derive(Debug)]
+// TODO: Write tests for this whole thing.
+
+#[derive(Copy, Clone, Debug, PartialEq)]
 enum Command {
     Increment,
     Decrement,
@@ -9,9 +11,11 @@ enum Command {
     Output,
     Input,
     LoopStart(usize),
-    LoopEnd,
+    LoopEnd(usize),
+    End,
 }
 
+// TODO: Change this to just from as additional characters should just be ignored not error.
 impl TryFrom<char> for Command {
     type Error = String;
 
@@ -24,53 +28,72 @@ impl TryFrom<char> for Command {
             '.' => Ok(Command::Output),
             ',' => Ok(Command::Input),
             '[' => Ok(Command::LoopStart(0)),
-            ']' => Ok(Command::LoopEnd),
+            ']' => Ok(Command::LoopEnd(0)),
             _ => Err(format!("Cannot convert {} to Command!", value)),
         }
     }
 }
 
+// TODO: Do we need wrapping memory cells?
 struct BrnFckInterpreter {
     data_pointer: usize,
     instruction_pointer: usize,
-    loop_counter: usize,
+    loops: Vec<usize>,
     memory: [u8; 30000],
 }
 
+// TODO: Add in ability to read in from file (using cmdline arg?)
 impl BrnFckInterpreter {
     fn new() -> Self {
         BrnFckInterpreter {
             data_pointer: 0,
             instruction_pointer: 0,
-            loop_counter: 0,
+            loops: Vec::new(),
             memory: [0; 30000]
         }
     }
 
+    // TODO: Split up this method into interpreting and executing.
     fn execute(&mut self, source: String) {
         // Parse the source into commands.
         let mut commands: Vec<Command> = Vec::new();
-        // TODO: Maybe use a stack of loops and pop when one is closed to assign jump indexes.
+        // Use a stack of loops and pop when one is closed to assign jump indexes.
         for (idx, symbol) in source.chars().enumerate() {
             let mut command = Command::try_from(symbol).unwrap();
             match command {
                 Command::LoopStart(_) => {
-                    // Put onto stack and increment loop counter.
+                    // Put onto stack.
+                    self.loops.push(idx);
                 },
-                Command:: LoopEnd => {
-                    // Decrement loop counter, pop stack and assign jump index.
+                Command::LoopEnd(_) => {
+                    // Pop stack and assign jump index.
+                    let loop_idx = self.loops.pop().unwrap();
+                    command = Command::LoopEnd(loop_idx - 1);
+                    commands[loop_idx] = Command::LoopStart(idx);
                 },
                 _ => {},
             }
             commands.push(command);
         }
+        // If there are any loops left then terminate
+        if self.loops.len() > 0 {
+            panic!("Mismatched loops!");
+        }
+        // Append a END command onto the end.
+        commands.push(Command::End);
         // Execute the commands.
-        for command in commands {
+        let mut command = commands[self.instruction_pointer];
+        while command != Command::End {
+            command = commands[self.instruction_pointer];
             match command {
-                // TODO: Consider how we want to handle loops (maybe store the start/end in enum)?
-                //       This may be an extra step in the parsing phase, where loops are calculated.
-                Command::LoopStart(jump_idx) => {},
-                Command:: LoopEnd => {},
+                Command::LoopStart(jump_idx) => {;
+                    if self.memory[self.data_pointer] == 0 {
+                        self.instruction_pointer = jump_idx;
+                    }
+                },
+                Command::LoopEnd(start_idx) => {
+                    self.instruction_pointer = start_idx;
+                },
                 _ => self.execute_command(command),
             }
             self.instruction_pointer += 1;
@@ -83,14 +106,15 @@ impl BrnFckInterpreter {
             Command::Decrement => self.memory[self.data_pointer] -= 1,
             Command::ShiftRight => self.data_pointer += 1,
             Command::ShiftLeft => self.data_pointer -= 1,
-            Command::Output => print!("{}", self.memory[self.data_pointer]),
+            Command::Output => print!("{}", self.memory[self.data_pointer] as char),
             Command::Input => {}, // TODO: IMPLEMENT
-            _ => {}, // TODO: Loops hit this should it error?
+            _ => {},
         }
     }
 }
 
 fn main() {
     let mut interpreter = BrnFckInterpreter::new();
-    interpreter.execute(String::from("++."));
+    // Print 'Hello World!'
+    interpreter.execute(String::from("++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++."));
 }
