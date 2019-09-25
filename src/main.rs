@@ -53,6 +53,13 @@ impl BrnFckInterpreter {
         }
     }
 
+    fn reset(&mut self) {
+        self.data_pointer = 0;
+        self.instruction_pointer = 0;
+        self.loops = Vec::new();
+        self.memory = [0; 30000];
+    }
+
     // TODO: Split up this method into interpreting and executing.
     fn execute(&mut self, source: String) {
         // Parse the source into commands.
@@ -98,6 +105,8 @@ impl BrnFckInterpreter {
             }
             self.instruction_pointer += 1;
         }
+        // Reset the interpreter
+        self.reset();
     }
 
     fn execute_command(&mut self, command: Command) {
