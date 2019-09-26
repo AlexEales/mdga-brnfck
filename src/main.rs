@@ -1,4 +1,4 @@
-use std::convert::TryFrom;
+use std::io::Read;
 
 // TODO: Write tests for this whole thing.
 
@@ -64,7 +64,7 @@ impl BrnFckInterpreter {
         let mut commands: Vec<Command> = Vec::new();
         // Use a stack of loops and pop when one is closed to assign jump indexes.
         for (idx, symbol) in source.chars().enumerate() {
-            let mut command = Command::try_from(symbol).unwrap();
+            let mut command = Command::from(symbol);
             match command {
                 Command::LoopStart(_) => {
                     // Put onto stack.
@@ -114,7 +114,14 @@ impl BrnFckInterpreter {
             Command::ShiftRight => self.data_pointer += 1,
             Command::ShiftLeft => self.data_pointer -= 1,
             Command::Output => print!("{}", self.memory[self.data_pointer] as char),
-            Command::Input => {}, // TODO: IMPLEMENT
+            Command::Input => {
+                let input: Option<u8> = std::io::stdin()
+                    .bytes()
+                    .next()
+                    .and_then(|result| result.ok())
+                    .map(|byte| byte as u8);
+                self.memory[self.data_pointer] = input.unwrap();
+            },
             _ => {},
         }
     }
