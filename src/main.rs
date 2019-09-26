@@ -1,4 +1,7 @@
+use std::fs;
+use std::env;
 use std::io::Read;
+use std::path::Path;
 
 // TODO: Write tests for this whole thing.
 
@@ -40,7 +43,6 @@ struct BrnFckInterpreter {
     memory: [u8; 30000],
 }
 
-// TODO: Add in ability to read in from file (using cmdline arg?)
 impl BrnFckInterpreter {
     fn new() -> Self {
         BrnFckInterpreter {
@@ -133,7 +135,18 @@ impl BrnFckInterpreter {
 }
 
 fn main() {
+    let args: Vec<String> = env::args().collect();
+    // Check file has been specified.
+    if args.len() <= 1 {
+        panic!("No file specified!");
+    }
+    let file_path = &args[1];
+    // Check file exists.
+    if !Path::new(file_path).exists() {
+        panic!("File does not exist!");
+    }
+    // Load file contents and execute the program.
+    let file_contents = fs::read_to_string(file_path).expect("Error occured when reading file!");
     let mut interpreter = BrnFckInterpreter::new();
-    // Print 'Hello World!'
-    interpreter.execute(String::from("++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++."));
+    interpreter.execute(file_contents);
 }
