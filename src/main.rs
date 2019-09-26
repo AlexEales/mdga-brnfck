@@ -35,7 +35,6 @@ impl From<char> for Command {
     }
 }
 
-// TODO: Do we need wrapping memory cells?
 struct BrnFckInterpreter {
     data_pointer: usize,
     instruction_pointer: usize,
@@ -116,10 +115,10 @@ impl BrnFckInterpreter {
 
     fn execute_command(&mut self, command: Command) {
         match command {
-            Command::Increment => self.memory[self.data_pointer] += 1,
-            Command::Decrement => self.memory[self.data_pointer] -= 1,
-            Command::ShiftRight => self.data_pointer += 1,
-            Command::ShiftLeft => self.data_pointer -= 1,
+            Command::Increment => self.memory[self.data_pointer] = self.memory[self.data_pointer].wrapping_add(1),
+            Command::Decrement => self.memory[self.data_pointer] = self.memory[self.data_pointer].wrapping_sub(1),
+            Command::ShiftRight => self.data_pointer = self.data_pointer.wrapping_add(1),
+            Command::ShiftLeft => self.data_pointer = self.data_pointer.wrapping_sub(1),
             Command::Output => print!("{}", self.memory[self.data_pointer] as char),
             Command::Input => {
                 let input: Option<u8> = std::io::stdin()
