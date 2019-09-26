@@ -12,24 +12,22 @@ enum Command {
     Input,
     LoopStart(usize),
     LoopEnd(usize),
+    Ignore,
     End,
 }
 
-// TODO: Change this to just from as additional characters should just be ignored not error.
-impl TryFrom<char> for Command {
-    type Error = String;
-
-    fn try_from(value: char) -> Result<Self, Self::Error> {
+impl From<char> for Command {
+    fn from(value: char) -> Self {
         match value {
-            '>' => Ok(Command::ShiftRight),
-            '<' => Ok(Command::ShiftLeft),
-            '+' => Ok(Command::Increment),
-            '-' => Ok(Command::Decrement),
-            '.' => Ok(Command::Output),
-            ',' => Ok(Command::Input),
-            '[' => Ok(Command::LoopStart(0)),
-            ']' => Ok(Command::LoopEnd(0)),
-            _ => Err(format!("Cannot convert {} to Command!", value)),
+            '>' => Command::ShiftRight,
+            '<' => Command::ShiftLeft,
+            '+' => Command::Increment,
+            '-' => Command::Decrement,
+            '.' => Command::Output,
+            ',' => Command::Input,
+            '[' => Command::LoopStart(0),
+            ']' => Command::LoopEnd(0),
+            _ => Command::Ignore,
         }
     }
 }
