@@ -58,8 +58,7 @@ impl BrnFckInterpreter {
         self.memory = [0; 30000];
     }
 
-    // TODO: Split up this method into interpreting and executing.
-    fn execute(&mut self, source: String) {
+    fn interpret(&mut self, source: String) -> Vec<Command> {
         // Parse the source into commands.
         let mut commands: Vec<Command> = Vec::new();
         // Use a stack of loops and pop when one is closed to assign jump indexes.
@@ -86,6 +85,12 @@ impl BrnFckInterpreter {
         }
         // Append a END command onto the end.
         commands.push(Command::End);
+        commands
+    }
+
+    fn execute(&mut self, source: String) {
+        // Interpret source.
+        let commands = self.interpret(source);
         // Execute the commands.
         let mut command = commands[self.instruction_pointer];
         while command != Command::End {
