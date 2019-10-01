@@ -70,6 +70,7 @@ fn parse(source: &str) -> Vec<Instruction> {
     instructions
 }
 
+// TODO: use these functions in a REPL or simple binary.
 // TODO: Abstract this so it has a closure (so it could capture a predefined input) passed in to handle IO?
 pub fn run(source: &str) {
     let instructions = parse(source);
@@ -171,13 +172,18 @@ mod test {
 
     #[test]
     fn hello_world_from_file() {
-        assert_eq!(run_from_file("./hello_world.bf", ""), "Hello World!\n");
+        assert_eq!(run_from_file("./programs/hello_world.b", ""), "Hello World!\n");
     }
 
     #[test]
     fn christmas_tree_from_file() {
-        assert_eq!(run_from_file("./christmas.bf", ""), "*\n");
-        assert_eq!(run_from_file("./christmas.bf", "12"), "            *\n           ***\n          *****\n         *******\n        *********\n       ***********\n      *************\n     ***************\n    *****************\n   *******************\n  *********************\n ***********************\n            *\n");
+        assert_eq!(run_from_file("./programs/christmas.b", ""), "*\n");
+        assert_eq!(run_from_file("./programs/christmas.b", "12"), "            *\n           ***\n          *****\n         *******\n        *********\n       ***********\n      *************\n     ***************\n    *****************\n   *******************\n  *********************\n ***********************\n            *\n");
+    }
+
+    #[test]
+    fn bubble_sort_from_file() {
+        assert_eq!(run_from_file("./programs/bubble_sort.b", "192837465"), "123456789");
     }
 
     #[test]
