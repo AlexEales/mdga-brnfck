@@ -150,7 +150,17 @@ pub fn run_with_input(source: &str, input: &str) -> String {
     output
 }
 
-pub fn run_from_file(file_path: &str, input: &str) -> String {
+pub fn run_from_file(file_path: &str) {
+    // Check file exists.
+    if !Path::new(file_path).exists() {
+        panic!("File does not exist!");
+    }
+    // Load file contents and execute the program.
+    let file_contents = fs::read_to_string(file_path).expect("Error occured when reading file!");
+    run(&file_contents)
+}
+
+pub fn run_from_file_with_input(file_path: &str, input: &str) -> String {
     // Check file exists.
     if !Path::new(file_path).exists() {
         panic!("File does not exist!");
@@ -162,7 +172,7 @@ pub fn run_from_file(file_path: &str, input: &str) -> String {
 
 #[cfg(test)]
 mod test {
-    use super::{run_with_input, run_from_file};
+    use super::{run_with_input, run_from_file_with_input};
 
     #[test]
     fn hello_world() {
@@ -172,18 +182,18 @@ mod test {
 
     #[test]
     fn hello_world_from_file() {
-        assert_eq!(run_from_file("./programs/hello_world.b", ""), "Hello World!\n");
+        assert_eq!(run_from_file_with_input("./programs/hello_world.b", ""), "Hello World!\n");
     }
 
     #[test]
     fn christmas_tree_from_file() {
-        assert_eq!(run_from_file("./programs/christmas.b", ""), "*\n");
-        assert_eq!(run_from_file("./programs/christmas.b", "12"), "            *\n           ***\n          *****\n         *******\n        *********\n       ***********\n      *************\n     ***************\n    *****************\n   *******************\n  *********************\n ***********************\n            *\n");
+        assert_eq!(run_from_file_with_input("./programs/christmas.b", ""), "*\n");
+        assert_eq!(run_from_file_with_input("./programs/christmas.b", "12"), "            *\n           ***\n          *****\n         *******\n        *********\n       ***********\n      *************\n     ***************\n    *****************\n   *******************\n  *********************\n ***********************\n            *\n");
     }
 
     #[test]
     fn bubble_sort_from_file() {
-        assert_eq!(run_from_file("./programs/bubble_sort.b", "192837465"), "123456789");
+        assert_eq!(run_from_file_with_input("./programs/bubble_sort.b", "192837465"), "123456789");
     }
 
     #[test]
